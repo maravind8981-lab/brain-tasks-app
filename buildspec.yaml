@@ -1,40 +1,26 @@
 version: 0.2
 
-env:
-  variables:
-    REGION: "ap-south-1"
-    CLUSTER: "brain-tasks-eks"
-    NAMESPACE: "default"
-  secrets-manager:
-    DOCKERHUB_USERNAME: "dockerhub-creds:username"
-    DOCKERHUB_PASSWORD: "dockerhub-creds:password"
-
 phases:
   pre_build:
     commands:
-      - echo Logging into Amazon ECR...
-      - ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-      - REPO_URI="$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/brain-tasks-app"
-      - aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $REPO_URI
-
-      - IMAGE_TAG=$(date +%s)
-      - echo "IMAGE_TAG=$IMAGE_TAG"
+      - echo Logging in to Amazon ECR...
+      - aws --version
+      - $(aws ecr get-login --no-include-email --region ap-south-1)
+      - REPO_URI=185743266330.dkr.ecr.ap-south-1.amazonaws.com/brain-tasks-app
+      - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
 
   build:
     commands:
-      - echo Building Docker image...
-      - docker build -t brain-tasks-app:$IMAGE_TAG .
-      - docker tag brain-tasks-app:$IMAGE_TAG $REPO_URI:$IMAGE_TAG
-
+      - echo Build started...
+      - docker build -t $REPO_URI:$IMAGE_TAG .
+  
   post_build:
     commands:
-      - echo Pushing Docker image to ECR...
+      - echo Build completed...
       - docker push $REPO_URI:$IMAGE_TAG
-
-      - echo Deploying to EKS cluster...
-      - chmod +x scripts/deploy-k8s.sh
-      - ./scripts/deploy-k8s.sh $IMAGE_TAG
+      - echo Writing image definitions...
+      - printf '[{"name":"brain-tasks-container","imageUri":"%s"}]' $REPO_URI:$IMAGE_TAG > imagedefinitions.json
 
 artifacts:
   files:
-    - '/*'
+    - imagedefinitions.json
