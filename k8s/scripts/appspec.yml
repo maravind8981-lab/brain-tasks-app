@@ -1,0 +1,13 @@
+version: 0.0
+Resources:
+  - DeploymentResource:
+      Type: Kubernetes
+      Properties:
+        ClusterName: brain-tasks-eks
+        Namespace: default
+        DeploymentName: brain-tasks-deployment
+Hooks:
+  AfterInstall:
+    - location: scripts/deploy-k8s.sh
+      timeout: 300
+      runas: root
