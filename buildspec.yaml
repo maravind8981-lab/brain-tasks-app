@@ -5,20 +5,19 @@ phases:
     commands:
       - echo Logging in to Amazon ECR...
       - aws --version
-      - $(aws ecr get-login --no-include-email --region ap-south-1)
+      - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 185743266330.dkr.ecr.ap-south-1.amazonaws.com
       - REPO_URI=185743266330.dkr.ecr.ap-south-1.amazonaws.com/brain-tasks-app
       - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
 
   build:
     commands:
-      - echo Build started...
+      - echo Building Docker image...
       - docker build -t $REPO_URI:$IMAGE_TAG .
-  
+
   post_build:
     commands:
-      - echo Build completed...
+      - echo Build complete.
       - docker push $REPO_URI:$IMAGE_TAG
-      - echo Writing image definitions...
       - printf '[{"name":"brain-tasks-container","imageUri":"%s"}]' $REPO_URI:$IMAGE_TAG > imagedefinitions.json
 
 artifacts:
