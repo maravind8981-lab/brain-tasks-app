@@ -3,21 +3,15 @@ version: 0.2
 phases:
   pre_build:
     commands:
-      - echo "Logging in to Docker Hub"
-      - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+      - echo "Pre-build phase"
 
   build:
     commands:
-      - echo "Building Docker image"
-      - docker build -t aravindkumar18/brain-tasks-app:latest .
+      - echo "Build phase completed"
 
-  post_build:
-    commands:
-      - echo "Pushing image to Docker Hub"
-      - docker push aravindkumar18/brain-tasks-app:latest
-  
-  artifacts:
-    files:
-     - buildspec-deploy.yaml
-     - deploy-k8s.sh
+artifacts:
+  files:
+    - buildspec-deploy.yaml
+    - deploy-k8s.sh
     - k8s//*
+  discard-paths: no
