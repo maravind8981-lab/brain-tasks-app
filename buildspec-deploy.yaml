@@ -1,0 +1,19 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo Installing kubectl
+      - curl -LO https://dl.k8s.io/release/v1.29.0/bin/linux/amd64/kubectl
+      - chmod +x kubectl
+      - mv kubectl /usr/local/bin/
+
+  pre_build:
+    commands:
+      - aws eks update-kubeconfig --region ap-south-1 --name brain-tasks-eks
+
+  build:
+    commands:
+      - chmod +x deploy-k8s.sh
+      - ./deploy-k8s.sh
+
