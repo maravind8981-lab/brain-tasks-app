@@ -1,0 +1,10 @@
+version: 0.0
+Resources:
+  - TargetService:
+      Type: Kubernetes
+      Properties:
+        TaskDefinition: k8s/deployment.yaml
+Hooks:
+  AfterAllowTraffic:
+    - location: k8s/scripts/deploy-k8s.sh
+      timeout: 300
