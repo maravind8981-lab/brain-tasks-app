@@ -1,15 +1,11 @@
-FROM node:18-alpine
+FROM nginx:alpine
 
-WORKDIR /app
+# Remove default nginx static files
+RUN rm -rf /usr/share/nginx/html/*
 
-# Copy package files from root
-COPY package*.json ./
+# Copy React build files
+COPY dist/ /usr/share/nginx/html/
 
-RUN npm install
+EXPOSE 80
 
-# Copy rest of the app
-COPY . .
-
-EXPOSE 3000
-
-CMD ["npm", "start"]
+CMD ["nginx", "-g", "daemon off;"]
