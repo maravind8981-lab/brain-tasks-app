@@ -1,28 +1,17 @@
 version: 0.2
 
-env:
-  secrets-manager:
-    DOCKER_USERNAME: dockerhub-creds:DOCKER_USERNAME
-    DOCKER_PASSWORD: dockerhub-creds:DOCKER_PASSWORD
-
 phases:
   pre_build:
     commands:
       - echo "Logging in to Docker Hub"
       - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-      - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
-      - echo "IMAGE_TAG=$IMAGE_TAG" > image.env
 
   build:
     commands:
       - echo "Building Docker image"
-      - docker build -t aravindkumar18/brain-tasks-app:$IMAGE_TAG .
+      - docker build -t aravindkumar18/brain-tasks-app:latest .
 
   post_build:
     commands:
-      - echo "Pushing Docker image"
-      - docker push aravindkumar18/brain-tasks-app:$IMAGE_TAG
-
-artifacts:
-  files:
-    - image.env
+      - echo "Pushing image to Docker Hub"
+      - docker push aravindkumar18/brain-tasks-app:latest
