@@ -1,25 +1,40 @@
 version: 0.2
 
+env:
+  variables:
+    DOCKERHUB_USERNAME: "aravindkumar18"
+    IMAGE_NAME: "brain-tasks-app"
+    AWS_REGION: "ap-south-1"
+    CLUSTER_NAME: "brain-tasks-eks"
+
 phases:
+  install:
+    commands:
+      - echo "Installing kubectl"
+      - curl -o kubectl https://s3.us-west-2.amazonaws.com/amazon-eks/1.29.0/2024-01-04/bin/linux/amd64/kubectl
+      - chmod +x kubectl
+      - mv kubectl /usr/local/bin/
+
   pre_build:
     commands:
-      - echo Logging in to Amazon ECR...
-      - aws --version
-      - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 185743266330.dkr.ecr.ap-south-1.amazonaws.com
-      - REPO_URI=185743266330.dkr.ecr.ap-south-1.amazonaws.com/brain-tasks-app
-      - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - echo "Logging in to Docker Hub"
+      - echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+      - IMAGE_TAG=$(date +%Y%m%d%H%M%S)
+      - echo "IMAGE_TAG=$IMAGE_TAG" > imageTag.txt
 
   build:
     commands:
-      - echo Building Docker image...
-      - docker build -t $REPO_URI:$IMAGE_TAG .
+      - echo "Building Docker image"
+      - docker build -t $DOCKERHUB_USERNAME/$IMAGE_NAME:$IMAGE_TAG .
+      - docker push $DOCKERHUB_USERNAME/$IMAGE_NAME:$IMAGE_TAG
 
   post_build:
     commands:
-      - echo Build complete.
-      - docker push $REPO_URI:$IMAGE_TAG
-      - printf '[{"name":"brain-tasks-container","imageUri":"%s"}]' $REPO_URI:$IMAGE_TAG > imagedefinitions.json
+      - echo "Build completed"
 
 artifacts:
   files:
-    - imagedefinitions.json
+    - k8s//*
+    - appspec.yml
+    - scripts//*
+    - imageTag.txt
