@@ -2,16 +2,20 @@
 set -e
 
 REGION="ap-south-1"
-CLUSTER="brain-tasks-eks"
+CLUSTER_NAME="brain-tasks-eks"
 NAMESPACE="default"
 
-aws eks update-kubeconfig --region $REGION --name $CLUSTER
+echo "Updating kubeconfig..."
+aws eks update-kubeconfig --region $REGION --name $CLUSTER_NAME
 
-IMAGE_TAG=$(cat imageTag.txt)
-IMAGE="aravindkumar18/brain-tasks-app:$IMAGE_TAG"
+echo "Loading image tag..."
+source image.env
+
+echo "Deploying image: aravindkumar18/brain-tasks-app:$IMAGE_TAG"
 
 kubectl set image deployment/brain-tasks-deployment \
-brain-tasks-container=$IMAGE \
+brain-tasks-container=aravindkumar18/brain-tasks-app:$IMAGE_TAG \
 -n $NAMESPACE
 
+echo "Waiting for rollout..."
 kubectl rollout status deployment/brain-tasks-deployment -n $NAMESPACE
