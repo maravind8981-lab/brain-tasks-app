@@ -15,3 +15,9 @@ phases:
     commands:
       - echo "Pushing image to Docker Hub"
       - docker push aravindkumar18/brain-tasks-app:latest
+  
+  artifacts:
+    files:
+     - buildspec-deploy.yaml
+     - deploy-k8s.sh
+    - k8s//*
