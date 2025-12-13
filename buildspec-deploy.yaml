@@ -3,18 +3,18 @@ version: 0.2
 phases:
   install:
     commands:
-      - echo "Installing kubectl"
+      - echo Installing kubectl
       - curl -o kubectl https://s3.us-west-2.amazonaws.com/amazon-eks/1.29.0/2024-01-04/bin/linux/amd64/kubectl
       - chmod +x kubectl
-      - mv kubectl /usr/local/bin/
+      - mv kubectl /usr/local/bin/kubectl
 
   pre_build:
     commands:
-      - echo "Configuring kubeconfig"
+      - echo Updating kubeconfig
       - aws eks update-kubeconfig --region ap-south-1 --name brain-task-cluster
 
   build:
     commands:
-      - echo "Deploying to EKS"
+      - echo Deploying application
       - chmod +x deploy-k8s.sh
       - ./deploy-k8s.sh
